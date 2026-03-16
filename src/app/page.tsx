@@ -93,46 +93,6 @@ export default function LandingPage() {
               Log in to Dashboard
             </Link>
           </motion.div>
-
-          {/* Preview card */}
-          <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="relative max-w-4xl mx-auto">
-            <div className="absolute -inset-4 bg-[#22c55e]/5 rounded-3xl blur-2xl" />
-            <div className="relative rounded-2xl border border-[#1f2937] bg-[#111827] overflow-hidden shadow-2xl">
-              <div className="flex items-center gap-2 px-4 h-10 bg-[#0d1117] border-b border-[#1f2937]">
-                <span className="w-3 h-3 rounded-full bg-[#ef4444]/60" />
-                <span className="w-3 h-3 rounded-full bg-[#f97316]/60" />
-                <span className="w-3 h-3 rounded-full bg-[#22c55e]/60" />
-                <div className="ml-4 flex-1 h-5 rounded-md bg-[#1f2937] max-w-xs" />
-              </div>
-              <div className="p-4 grid grid-cols-3 gap-3">
-                {[{ label: "Total Boards", value: "6", color: "#9ca3af" }, { label: "Online", value: "5", color: "#22c55e" }, { label: "Offline", value: "1", color: "#ef4444" }].map((s) => (
-                  <div key={s.label} className="rounded-xl p-3 border border-[#1f2937] bg-[#0d1117]">
-                    <p className="text-xs text-[#9ca3af] mb-1">{s.label}</p>
-                    <p className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
-                  </div>
-                ))}
-                <div className="col-span-2 rounded-xl border border-[#1f2937] bg-[#0d1117] h-32 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "linear-gradient(rgba(34,197,94,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(34,197,94,0.3) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-                  {[{ top: "30%", left: "25%", c: "#22c55e" }, { top: "55%", left: "55%", c: "#22c55e" }, { top: "20%", left: "65%", c: "#ef4444" }, { top: "70%", left: "35%", c: "#f97316" }].map((p, i) => (
-                    <div key={i} className="absolute" style={{ top: p.top, left: p.left }}>
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: p.c + "33", border: `1px solid ${p.c}` }}>
-                        <div className="w-2 h-2 rounded-full" style={{ background: p.c }} />
-                      </div>
-                    </div>
-                  ))}
-                  <Map className="w-6 h-6 text-[#374151]" />
-                </div>
-                <div className="rounded-xl border border-[#1f2937] bg-[#0d1117] h-32 p-3 flex flex-col justify-center gap-2">
-                  {[{ label: "Temp", val: "26.4°C", color: "#f97316" }, { label: "Humidity", val: "58%", color: "#38bdf8" }, { label: "Score", val: "Good", color: "#22c55e" }].map((r) => (
-                    <div key={r.label} className="flex justify-between items-center">
-                      <span className="text-[10px] text-[#9ca3af]">{r.label}</span>
-                      <span className="text-xs font-semibold" style={{ color: r.color }}>{r.val}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 
@@ -147,6 +107,193 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Preview card */}
+      <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.5 }} className="relative max-w-4xl mx-auto my-10">
+        <div className="absolute -inset-4 bg-[#22c55e]/5 rounded-3xl blur-2xl" />
+        <div className="relative rounded-2xl border border-[#1f2937] bg-[#0d1117] overflow-hidden shadow-2xl text-left">
+
+          {/* Browser chrome */}
+          <div className="flex items-center gap-2 px-4 h-9 bg-[#0a0a0a] border-b border-[#1f2937]">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#f97316]/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]/70" />
+            <div className="ml-3 flex items-center gap-1.5 flex-1 max-w-xs">
+              <div className="h-4 w-4 rounded bg-[#1f2937] flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full border border-[#374151]" />
+              </div>
+              <div className="flex-1 h-4 rounded bg-[#1f2937] flex items-center px-2 gap-1">
+                <Wifi className="w-2.5 h-2.5 text-[#22c55e]" />
+                <span className="text-[9px] text-[#4b5563]">nestsense.io/dashboard</span>
+              </div>
+            </div>
+            <div className="ml-auto flex gap-3">
+              <div className="h-4 w-12 rounded bg-[#1f2937]" />
+              <div className="h-4 w-8 rounded bg-[#1f2937]" />
+            </div>
+          </div>
+
+          {/* App nav */}
+          <div className="flex items-center justify-between px-4 h-10 bg-[#0d1117] border-b border-[#1f2937]">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-[#22c55e]/20 flex items-center justify-center">
+                <Wifi className="w-3 h-3 text-[#22c55e]" />
+              </div>
+              <span className="text-xs font-bold text-white">Nest<span className="text-[#22c55e]">Sense</span></span>
+              <span className="text-[10px] text-[#374151] ml-1">/ Dashboard</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-[#1f2937]" />
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#111827] border border-[#1f2937]">
+                <div className="w-4 h-4 rounded-full bg-[#22c55e]/20 flex items-center justify-center"><span className="text-[7px] text-[#22c55e]">T</span></div>
+                <span className="text-[9px] text-[#9ca3af]">test</span>
+                <span className="text-[7px] px-1 rounded bg-[#38bdf8]/20 text-[#38bdf8]">User</span>
+              </div>
+              <div className="px-2 py-0.5 rounded-lg bg-[#ef4444]/20 border border-[#ef4444]/20">
+                <span className="text-[8px] text-[#ef4444]">Logout</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stat bar */}
+          <div className="flex gap-2 px-3 py-2 bg-[#0d1117] border-b border-[#1f2937]">
+            {[{ label: "Total Boards", val: "6", color: "#9ca3af" }, { label: "Online", val: "5", color: "#22c55e" }, { label: "Offline", val: "1", color: "#ef4444" }, { label: "Comfortable", val: "4", color: "#22c55e" }].map((s) => (
+              <div key={s.label} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-[#111827] flex-1" style={{ borderColor: s.color + "22" }}>
+                <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: s.color + "20" }}>
+                  <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+                </div>
+                <div>
+                  <p className="text-[7px] text-[#6b7280] leading-tight">{s.label}</p>
+                  <p className="text-sm font-bold leading-tight" style={{ color: s.color }}>{s.val}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Main area */}
+          <div className="flex" style={{ height: "210px" }}>
+            {/* Sidebar */}
+            <div className="w-28 shrink-0 border-r border-[#1f2937] bg-[#0d1117] flex flex-col">
+              <div className="flex items-center justify-between px-2 py-1.5 border-b border-[#1f2937]">
+                <span className="text-[8px] font-semibold text-[#4b5563] uppercase tracking-wider">Boards</span>
+                <div className="w-4 h-4 rounded bg-[#22c55e]/15 border border-[#22c55e]/20 flex items-center justify-center">
+                  <span className="text-[#22c55e] text-[9px] font-bold leading-none">+</span>
+                </div>
+              </div>
+              <div className="flex-1 p-1.5 space-y-1 overflow-hidden">
+                {[
+                  { room: "Living Room", temp: "26.4°C", online: true, score: "Comfortable", selected: true },
+                  { room: "Bedroom", temp: "24.1°C", online: true, score: "Comfortable", selected: false },
+                  { room: "Kitchen", temp: "29.3°C", online: true, score: "Uncomfortable", selected: false },
+                  { room: "Study", temp: "25.8°C", online: false, score: "Moderate", selected: false },
+                ].map((b) => (
+                  <div key={b.room} className={`w-full text-left px-1.5 py-1 rounded-lg border flex items-center gap-1.5 ${b.selected ? "border-[#22c55e]/40 bg-[#22c55e]/10" : "border-[#1f2937] bg-[#111827]"}`}>
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: b.online ? "#22c55e" : "#ef4444" }} />
+                    <div className="min-w-0">
+                      <p className="text-[8px] font-medium text-white truncate">{b.room}</p>
+                      <p className="text-[7px] text-[#f97316]">{b.temp}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Map area */}
+            <div className="flex-1 relative overflow-hidden bg-[#0d1117]">
+              {/* Dark map grid */}
+              <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(34,197,94,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(34,197,94,0.06) 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_40%_50%,rgba(10,10,20,0)_20%,rgba(5,5,10,0.6)_100%)]" />
+              {/* Road-like lines */}
+              <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 300 210" preserveAspectRatio="none">
+                <path d="M0 80 Q80 75 150 90 Q220 105 300 95" stroke="#374151" strokeWidth="2" fill="none"/>
+                <path d="M0 130 Q100 125 180 140 Q240 150 300 145" stroke="#374151" strokeWidth="1.5" fill="none"/>
+                <path d="M120 0 Q125 50 130 105 Q133 155 135 210" stroke="#374151" strokeWidth="1.5" fill="none"/>
+                <path d="M200 0 Q205 60 210 105 Q215 160 220 210" stroke="#374151" strokeWidth="1" fill="none"/>
+              </svg>
+              {/* Board markers */}
+              {[
+                { top: "32%", left: "28%", color: "#22c55e", label: "Living Room", selected: true },
+                { top: "50%", left: "44%", color: "#22c55e", label: "Bedroom" },
+                { top: "22%", left: "58%", color: "#ef4444", label: "Kitchen" },
+                { top: "65%", left: "35%", color: "#6b7280", label: "Study" },
+                { top: "42%", left: "68%", color: "#f97316", label: "Office" },
+                { top: "72%", left: "62%", color: "#22c55e", label: "Garage" },
+              ].map((m, i) => (
+                <div key={i} className="absolute" style={{ top: m.top, left: m.left }}>
+                  {m.selected && <div className="absolute -inset-2 rounded-full animate-ping" style={{ background: m.color + "30" }} />}
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center relative" style={{ background: m.color + "25", border: `1.5px solid ${m.color}` }}>
+                    <Wifi className="w-2.5 h-2.5" style={{ color: m.color }} />
+                  </div>
+                  {m.selected && (
+                    <div className="absolute left-6 top-0 bg-[#111827] border border-[#22c55e]/40 rounded-md px-1.5 py-0.5 whitespace-nowrap">
+                      <p className="text-[8px] font-semibold text-[#22c55e]">{m.label}</p>
+                      <p className="text-[7px] text-[#f97316]">26.4°C · 58%</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+                <div className="w-5 h-5 rounded bg-[#111827] border border-[#1f2937] flex items-center justify-center"><span className="text-[#6b7280] text-[10px]">+</span></div>
+                <div className="w-5 h-5 rounded bg-[#111827] border border-[#1f2937] flex items-center justify-center"><span className="text-[#6b7280] text-[10px]">−</span></div>
+              </div>
+            </div>
+
+            {/* Data panel */}
+            <div className="w-36 shrink-0 border-l border-[#1f2937] bg-[#0d1117] flex flex-col overflow-hidden">
+              {/* Panel header */}
+              <div className="px-2 py-1.5 border-b border-[#1f2937]">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                  <span className="text-[7px] font-semibold text-[#22c55e]">Online</span>
+                </div>
+                <p className="text-[9px] font-bold text-white">Living Room</p>
+                <p className="text-[7px] text-[#4b5563]">KidBright #1</p>
+              </div>
+              {/* Time range dropdown */}
+              <div className="px-2 py-1 border-b border-[#1f2937] flex items-center gap-1">
+                <div className="w-2.5 h-2.5 text-[#22c55e]"><Activity className="w-2.5 h-2.5 text-[#22c55e]"/></div>
+                <div className="flex-1 h-4 rounded bg-[#111827] border border-[#1f2937] flex items-center px-1.5 justify-between">
+                  <span className="text-[7px] text-[#6b7280]">2 hrs</span>
+                  <ChevronRight className="w-2 h-2 text-[#374151] rotate-90" />
+                </div>
+              </div>
+              {/* Comfort score */}
+              <div className="mx-2 mt-1.5 rounded-lg p-1.5" style={{ background: "#22c55e15", border: "1px solid #22c55e30" }}>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[7px] text-[#9ca3af]">Comfort</span>
+                </div>
+                <p className="text-[9px] font-bold text-[#22c55e] mb-1">Comfortable</p>
+                <div className="h-1 rounded-full bg-[#1f2937] overflow-hidden">
+                  <div className="h-full rounded-full bg-[#22c55e]" style={{ width: "94%" }} />
+                </div>
+                <p className="text-[6px] text-[#4b5563] mt-0.5 text-right">94% conf.</p>
+              </div>
+              {/* Sensor rows */}
+              <div className="flex-1 px-2 py-1 space-y-1 overflow-hidden">
+                {[
+                  { label: "Temperature", val: "26.4°C", color: "#f97316", bars: [40, 55, 48, 60, 52, 58, 62, 59, 64, 60] },
+                  { label: "Humidity", val: "58%", color: "#38bdf8", bars: [60, 58, 62, 55, 60, 57, 59, 61, 58, 60] },
+                  { label: "Light", val: "620 lx", color: "#facc15", bars: [30, 45, 60, 70, 65, 75, 68, 72, 69, 71] },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-lg bg-[#111827] border border-[#1f2937] p-1.5">
+                    <div className="flex justify-between items-center mb-0.5">
+                      <span className="text-[7px] text-[#6b7280]">{s.label}</span>
+                      <span className="text-[8px] font-bold" style={{ color: s.color }}>{s.val}</span>
+                    </div>
+                    {/* Micro sparkline */}
+                    <svg viewBox="0 0 60 12" className="w-full h-2.5" preserveAspectRatio="none">
+                      <polyline
+                        points={s.bars.map((v, i) => `${(i / (s.bars.length - 1)) * 60},${12 - (v / 100) * 10}`).join(" ")}
+                        fill="none" stroke={s.color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Features */}
       <section id="features" className="py-24 px-6">
