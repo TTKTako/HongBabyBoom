@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Wifi, Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
+import { Wifi, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,11 +38,17 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(34,197,94,0.08)_0%,transparent_60%)]" />
 
         {/* Logo */}
-        <div className="relative z-10 flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-[#22c55e]/20 flex items-center justify-center">
-            <Wifi className="w-5 h-5 text-[#22c55e]" />
-          </div>
-          <span className="text-xl font-bold text-white">Nest<span className="text-[#22c55e]">Sense</span></span>
+        <div className="relative z-10 flex flex-col gap-3">
+          <Link href="/" className="flex items-center gap-2 group w-fit">
+            <div className="w-9 h-9 rounded-lg bg-[#22c55e]/20 flex items-center justify-center group-hover:bg-[#22c55e]/30 transition-colors">
+              <Wifi className="w-5 h-5 text-[#22c55e]" />
+            </div>
+            <span className="text-xl font-bold text-white group-hover:text-[#22c55e] transition-colors">Nest<span className="text-[#22c55e]">Sense</span></span>
+          </Link>
+          <Link href="/" className="flex items-center gap-1.5 text-[#4b5563] hover:text-[#22c55e] transition-colors text-xs w-fit">
+            <ArrowLeft className="w-3 h-3" />
+            Back to home
+          </Link>
         </div>
 
         {/* Center content */}
@@ -73,12 +79,16 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center">
+          <Link href="/" className="lg:hidden flex items-center gap-2 mb-3 group w-fit">
+            <div className="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center group-hover:bg-[#22c55e]/30 transition-colors">
               <Wifi className="w-4 h-4 text-[#22c55e]" />
             </div>
-            <span className="text-lg font-bold text-white">Nest<span className="text-[#22c55e]">Sense</span></span>
-          </div>
+            <span className="text-lg font-bold text-white group-hover:text-[#22c55e] transition-colors">Nest<span className="text-[#22c55e]">Sense</span></span>
+          </Link>
+          <Link href="/" className="lg:hidden flex items-center gap-1.5 text-[#4b5563] hover:text-[#22c55e] transition-colors text-xs mb-6 w-fit">
+            <ArrowLeft className="w-3 h-3" />
+            Back to home
+          </Link>
 
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
