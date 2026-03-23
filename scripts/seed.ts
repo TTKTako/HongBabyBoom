@@ -19,6 +19,12 @@ async function main() {
 
   console.log('Connected to database.');
 
+  // ─── Migrate: add role column if missing ────────────────────────────────────
+  await db.query(
+    "ALTER TABLE proj_users ADD COLUMN IF NOT EXISTS role ENUM('admin','user') NOT NULL DEFAULT 'user'"
+  );
+  console.log('  Ensured role column exists on proj_users.');
+
   // ─── Users ─────────────────────────────────────────────────────────────────
   const users: { displayName: string; password: string }[] = [
     { displayName: 'demo',  password: 'demo123' },
@@ -44,6 +50,10 @@ async function main() {
     userIds[u.displayName] = res.insertId;
     console.log(`  Created user "${u.displayName}" (id=${res.insertId})`);
   }
+
+  // Ensure admin user has role='admin'
+  await db.query("UPDATE proj_users SET role = 'admin' WHERE display_name = 'admin'");
+  console.log('  Set role=admin for "admin" user.');
 
   // ─── Boards ─────────────────────────────────────────────────────────────────
   const boardDefs = [

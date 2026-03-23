@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       [displayName, hash]
     );
 
-    const token = await signToken({ userId: result.insertId, displayName });
+    const token = await signToken({ userId: result.insertId, displayName, role: 'user' });
 
     const response = NextResponse.json({ success: true, displayName });
     response.cookies.set('nestsense_token', token, {
