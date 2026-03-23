@@ -3,16 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Wifi, LogOut, User, Bell, Settings } from "lucide-react";
+import { Wifi, LogOut, User, Bell, Settings, Shield } from "lucide-react";
 
 export default function DashboardNav() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (data) setDisplayName(data.displayName); })
+      .then((data) => {
+        if (data) {
+          setDisplayName(data.displayName);
+          setIsAdmin(data.role === "admin");
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -41,6 +47,17 @@ export default function DashboardNav() {
 
       {/* Right side */}
       <div className="flex items-center gap-2">
+        {/* Admin link — visible to admins only */}
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#f97316]/30 bg-[#f97316]/10 text-[#f97316] text-sm font-medium hover:bg-[#f97316]/20 transition-colors"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span className="hidden sm:block">Admin</span>
+          </Link>
+        )}
+
         {/* Notification bell */}
         <button className="relative p-2 rounded-lg hover:bg-[#1f2937] text-[#6b7280] hover:text-white transition-colors">
           <Bell className="w-4 h-4" />

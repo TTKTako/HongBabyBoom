@@ -10,5 +10,5 @@ export async function GET(req: NextRequest) {
   if (!payload) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
-  return NextResponse.json({ userId: payload.userId, displayName: payload.displayName });
+  return NextResponse.json({ userId: payload.userId, displayName: payload.displayName, role: payload.role ?? 'user' });
 }

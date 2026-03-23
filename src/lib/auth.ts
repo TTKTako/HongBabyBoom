@@ -7,10 +7,11 @@ const JWT_SECRET = new TextEncoder().encode(
 export interface JWTPayload {
   userId: number;
   displayName: string;
+  role: string;
 }
 
 export async function signToken(payload: JWTPayload): Promise<string> {
-  return new SignJWT({ userId: payload.userId, displayName: payload.displayName })
+  return new SignJWT({ userId: payload.userId, displayName: payload.displayName, role: payload.role })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
@@ -23,6 +24,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
     return {
       userId: payload.userId as number,
       displayName: payload.displayName as string,
+      role: (payload.role as string) ?? 'user',
     };
   } catch {
     return null;

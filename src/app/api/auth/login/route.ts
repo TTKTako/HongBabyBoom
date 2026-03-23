@@ -8,6 +8,7 @@ interface UserRow extends RowDataPacket {
   id: number;
   password_hash: string;
   display_name: string;
+  role: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     const [rows] = await pool.query<UserRow[]>(
-      'SELECT id, password_hash, display_name FROM proj_users WHERE display_name = ? LIMIT 1',
+      'SELECT id, password_hash, display_name, role FROM proj_users WHERE display_name = ? LIMIT 1',
       [username]
     );
 
@@ -35,9 +36,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials.' }, { status: 401 });
     }
 
-    const token = await signToken({ userId: user.id, displayName: user.display_name });
+    const token = await signToken({ userId: user.id, displayName: user.display_name, role: user.role ?? 'user' });
 
-    const response = NextResponse.json({ success: true, displayName: user.display_name });
+    const response = NextResponse.json({ success: true, displayName: user.display_name, role: user.role ?? 'user' });
     response.cookies.set('nestsense_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
