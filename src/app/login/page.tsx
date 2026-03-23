@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!email || !password) {
@@ -22,11 +22,23 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    // Mock auth — any credentials work
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Login failed.");
+        setLoading(false);
+        return;
+      }
       router.push("/dashboard");
-    }, 1200);
+    } catch {
+      setError("Network error. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,7 +110,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
-              <label className="block text-sm text-[#9ca3af] mb-2">Email or Username</label>
+              <label className="block text-sm text-[#9ca3af] mb-2">Username</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4b5563]" />
                 <input
@@ -115,7 +127,6 @@ export default function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm text-[#9ca3af]">Password</label>
-                <button type="button" className="text-xs text-[#22c55e] hover:text-[#4ade80] transition-colors">Forgot password?</button>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4b5563]" />
@@ -166,26 +177,6 @@ export default function LoginPage() {
               Create one free <ArrowRight className="inline w-3 h-3" />
             </Link>
           </p>
-
-          {/* Demo hint */}
-          <div className="mt-8 p-4 rounded-xl border border-[#1f2937] bg-[#111827]/50 space-y-2">
-            <p className="text-xs text-[#6b7280] font-semibold mb-2">Demo Credentials</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#4b5563]">Username</span>
-              <code className="text-xs text-[#22c55e] bg-[#22c55e]/10 px-2 py-0.5 rounded font-mono">test</code>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#4b5563]">Password</span>
-              <code className="text-xs text-[#22c55e] bg-[#22c55e]/10 px-2 py-0.5 rounded font-mono">any</code>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#4b5563]">Role</span>
-              <div className="flex gap-1">
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#38bdf8]/10 text-[#38bdf8]">User</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#ef4444]/10 text-[#ef4444]">Admin</span>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </div>
     </div>

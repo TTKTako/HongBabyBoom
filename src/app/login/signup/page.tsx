@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Wifi, Mail, Lock, Eye, EyeOff, User, ArrowRight, ArrowLeft, UserPlus, CheckCircle2 } from "lucide-react";
+import { Wifi, Lock, Eye, EyeOff, User, ArrowRight, ArrowLeft, UserPlus, CheckCircle2 } from "lucide-react";
 
 const PERKS = [
   "Unlimited boards & rooms",
@@ -15,7 +15,7 @@ const PERKS = [
 
 export default function SignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ name: "", password: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,10 +23,10 @@ export default function SignupPage() {
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!form.name || !form.email || !form.password || !form.confirm) {
+    if (!form.name || !form.password || !form.confirm) {
       setError("Please fill in all fields.");
       return;
     }
@@ -39,10 +39,23 @@ export default function SignupPage() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName: form.name, password: form.password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Signup failed.");
+        setLoading(false);
+        return;
+      }
       router.push("/dashboard");
-    }, 1400);
+    } catch {
+      setError("Network error. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,19 +121,10 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
             <div>
-              <label className="block text-sm text-[#9ca3af] mb-2">Full Name</label>
+              <label className="block text-sm text-[#9ca3af] mb-2">Username / Display Name</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4b5563]" />
-                <input type="text" value={form.name} onChange={update("name")} placeholder="John Doe" className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#111827] border border-[#1f2937] text-[#f0f0f0] placeholder-[#4b5563] focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e]/30 transition-all text-sm" />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm text-[#9ca3af] mb-2">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4b5563]" />
-                <input type="email" value={form.email} onChange={update("email")} placeholder="you@example.com" className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#111827] border border-[#1f2937] text-[#f0f0f0] placeholder-[#4b5563] focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e]/30 transition-all text-sm" />
+                <input type="text" value={form.name} onChange={update("name")} placeholder="e.g. JohnDoe" className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#111827] border border-[#1f2937] text-[#f0f0f0] placeholder-[#4b5563] focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e]/30 transition-all text-sm" />
               </div>
             </div>
 

@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wifi,
@@ -259,11 +260,19 @@ function AddBoardModal({ onClose, onAdd }: { onClose: () => void; onAdd: (form: 
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [boards, setBoards] = useState(MOCK_BOARDS);
+
+  // Auth guard — redirect to login if no valid session
+  useEffect(() => {
+    fetch("/api/auth/me").then((r) => {
+      if (!r.ok) router.replace("/login");
+    }).catch(() => router.replace("/login"));
+  }, [router]);
 
   const selectedBoard = boards.find((b) => b.id === selectedId) ?? null;
 

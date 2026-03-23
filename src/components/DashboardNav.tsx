@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Wifi, LogOut, User, Bell, Settings } from "lucide-react";
-import { MOCK_USER } from "@/lib/mockData";
-
-const ROLE_COLOR: Record<string, string> = {
-  Admin: "#ef4444",
-  Staff: "#22c55e",
-  User: "#38bdf8",
-};
 
 export default function DashboardNav() {
   const router = useRouter();
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data) setDisplayName(data.displayName); })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   };
 
@@ -52,16 +55,7 @@ export default function DashboardNav() {
         {/* User info */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#1f2937] bg-[#111827] ml-1">
           <User className="w-3.5 h-3.5 text-[#6b7280]" />
-          <span className="text-sm text-[#d1d5db] hidden sm:block">{MOCK_USER.username}</span>
-          <span
-            className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-            style={{
-              color: ROLE_COLOR[MOCK_USER.role] || "#9ca3af",
-              background: (ROLE_COLOR[MOCK_USER.role] || "#9ca3af") + "20",
-            }}
-          >
-            {MOCK_USER.role}
-          </span>
+          <span className="text-sm text-[#d1d5db] hidden sm:block">{displayName ?? "…"}</span>
         </div>
 
         {/* Logout */}
