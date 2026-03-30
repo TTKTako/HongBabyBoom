@@ -1,29 +1,43 @@
 import { useEffect, useRef } from "react";
-import type { Board } from "@/lib/mockData";
+
+export interface DashboardBoard {
+  id: number;
+  area_name: string;
+  board_token: string;
+  lat: number;
+  lng: number;
+  online: boolean;
+  last_seen_at: string | null;
+  registered_at: string;
+  latest_temp: number | null;
+  latest_humidity: number | null;
+  latest_comfort: "Comfortable" | "Moderate" | "Uncomfortable" | null;
+}
 
 interface Props {
-  boards: Board[];
-  selectedId: string | null;
-  onBoardClick: (id: string) => void;
+  boards: DashboardBoard[];
+  selectedId: number | null;
+  onBoardClick: (id: number) => void;
 }
 
 const COMFORT_COLOR: Record<string, string> = {
-  Comfortable: "#22c55e",
-  Moderate: "#f97316",
+  Comfortable:   "#22c55e",
+  Moderate:      "#f97316",
   Uncomfortable: "#ef4444",
 };
 
 export default function MapComponent({ boards, selectedId, onBoardClick }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null);
+  const mapRef     = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const leafletRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markersRef = useRef<Record<string, any>>({});
+  const markersRef = useRef<Record<number, any>>({});
 
   useEffect(() => {
     if (!mapRef.current || leafletRef.current) return;
 
-    let L: typeof import("leaflet");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let L: any;
 
     const init = async () => {
       L = (await import("leaflet")).default;
@@ -31,12 +45,16 @@ export default function MapComponent({ boards, selectedId, onBoardClick }: Props
       // Compute bounds from all boards so the map auto-fits
       const lats = boards.map((b) => b.lat);
       const lngs = boards.map((b) => b.lng);
-      const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
-      const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+      const centerLat = boards.length
+        ? (Math.min(...lats) + Math.max(...lats)) / 2
+        : 13.7563;
+      const centerLng = boards.length
+        ? (Math.min(...lngs) + Math.max(...lngs)) / 2
+        : 100.5018;
 
       const map = L.map(mapRef.current!, {
         center: [centerLat, centerLng],
-        zoom: 15,
+        zoom: 13,
         zoomControl: true,
         attributionControl: false,
       });
@@ -54,14 +72,12 @@ export default function MapComponent({ boards, selectedId, onBoardClick }: Props
       // Add markers
       boards.forEach((board) => {
         const color = board.online
-          ? COMFORT_COLOR[board.current.comfortScore]
+          ? (board.latest_comfort ? COMFORT_COLOR[board.latest_comfort] : "#22c55e")
           : "#6b7280";
 
         const markerHtml = `
           <div style="position:relative;width:36px;height:36px;cursor:pointer;">
-            <!-- outer ring anim -->
-            ${board.online ? `<div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid ${color};opacity:0.4;animation:signal-ring 2s ease-out infinite;"></div>` : ""}
-            <!-- bg circle -->
+            ${board.online ? `<div style="position:absolute;top:-4px;left:-4px;right:-4px;bottom:-4px;border-radius:50%;border:2px solid ${color};opacity:0.4;animation:signal-ring 2s ease-out infinite;"></div>` : ""}
             <div style="
               width:36px;height:36px;border-radius:50%;
               background:${color}22;
@@ -87,28 +103,37 @@ export default function MapComponent({ boards, selectedId, onBoardClick }: Props
           popupAnchor: [0, -22],
         });
 
+        const tempCell = board.latest_temp != null
+          ? `<div style="background:#0d1117;border-radius:6px;padding:6px;">
+               <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Temp</div>
+               <div style="font-size:14px;font-weight:700;color:#f97316;">${board.latest_temp.toFixed(1)}°C</div>
+             </div>`
+          : "";
+        const humCell = board.latest_humidity != null
+          ? `<div style="background:#0d1117;border-radius:6px;padding:6px;">
+               <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Humidity</div>
+               <div style="font-size:14px;font-weight:700;color:#38bdf8;">${board.latest_humidity.toFixed(0)}%</div>
+             </div>`
+          : "";
+        const comfortCell = board.latest_comfort
+          ? `<div style="background:#0d1117;border-radius:6px;padding:6px;grid-column:span 2;">
+               <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Comfort</div>
+               <div style="font-size:11px;font-weight:700;color:${color};">${board.latest_comfort}</div>
+             </div>`
+          : "";
+        const gridContent = tempCell || humCell || comfortCell
+          ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">${tempCell}${humCell}${comfortCell}</div>`
+          : `<div style="font-size:10px;color:#374151;">No readings yet</div>`;
+
         const popupContent = `
           <div style="font-family:system-ui,sans-serif;padding:2px;">
-            <div style="font-weight:700;color:#f0f0f0;font-size:13px;margin-bottom:4px;">${board.room}</div>
-            <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;">${board.name} · ${board.online ? '<span style="color:#22c55e">Online</span>' : '<span style="color:#6b7280">Offline</span>'}</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-              <div style="background:#0d1117;border-radius:6px;padding:6px;">
-                <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Temp</div>
-                <div style="font-size:14px;font-weight:700;color:#f97316;">${board.current.temperature}°C</div>
-              </div>
-              <div style="background:#0d1117;border-radius:6px;padding:6px;">
-                <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Humidity</div>
-                <div style="font-size:14px;font-weight:700;color:#38bdf8;">${board.current.humidity}%</div>
-              </div>
-              <div style="background:#0d1117;border-radius:6px;padding:6px;">
-                <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Light</div>
-                <div style="font-size:14px;font-weight:700;color:#facc15;">${board.current.light} lx</div>
-              </div>
-              <div style="background:#0d1117;border-radius:6px;padding:6px;">
-                <div style="font-size:9px;color:#6b7280;margin-bottom:1px;">Comfort</div>
-                <div style="font-size:11px;font-weight:700;color:${color};">${board.current.comfortScore}</div>
-              </div>
+            <div style="font-weight:700;color:#f0f0f0;font-size:13px;margin-bottom:4px;">${board.area_name}</div>
+            <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;">
+              ${board.online
+                ? '<span style="color:#22c55e">● Online</span>'
+                : '<span style="color:#6b7280">● Offline</span>'}
             </div>
+            ${gridContent}
           </div>
         `;
 
@@ -146,7 +171,7 @@ export default function MapComponent({ boards, selectedId, onBoardClick }: Props
 
   // Highlight selected marker
   useEffect(() => {
-    if (!leafletRef.current || !selectedId) return;
+    if (!leafletRef.current || selectedId == null) return;
     const marker = markersRef.current[selectedId];
     if (marker) {
       leafletRef.current.setView(marker.getLatLng(), 17, { animate: true });
@@ -155,6 +180,19 @@ export default function MapComponent({ boards, selectedId, onBoardClick }: Props
   }, [selectedId]);
 
   return (
-    <div ref={mapRef} className="w-full h-full" />
+    <>
+      <style>{`
+        .leaflet-dark-popup .leaflet-popup-content-wrapper {
+          background: #111827;
+          border: 1px solid #1f2937;
+          color: #f0f0f0;
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        .leaflet-dark-popup .leaflet-popup-tip { background: #111827; }
+        .leaflet-dark-popup .leaflet-popup-close-button { color: #6b7280 !important; }
+      `}</style>
+      <div ref={mapRef} className="w-full h-full" />
+    </>
   );
 }
