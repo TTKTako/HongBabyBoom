@@ -25,7 +25,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import DashboardNav from "@/components/DashboardNav";
-import DataPanel, { type BoardSensorData } from "@/components/DataPanel";
+import DataPanel, { type BoardSensorData, type HistoryPoint } from "@/components/DataPanel";
 import type { DashboardBoard } from "@/components/MapComponent";
 
 // ── Lazy-load heavy map components (no SSR) ──────────────────────────────────
@@ -487,6 +487,8 @@ export default function DashboardPage() {
   const [selectedId, setSelectedId]       = useState<number | null>(null);
   const [selectedData, setSelectedData]   = useState<BoardSensorData | null>(null);
   const [loadingData, setLoadingData]     = useState(false);
+  const [history, setHistory]             = useState<HistoryPoint[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [showSidebar, setShowSidebar]     = useState(false);
   const [showAddModal, setShowAddModal]   = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -518,6 +520,18 @@ export default function DashboardPage() {
       .then((data) => { if (data) setSelectedData(data); })
       .catch(console.error)
       .finally(() => setLoadingData(false));
+  }, [selectedId]);
+
+  // ── Load history (24h timeline) when a board is selected ──────────────────
+  useEffect(() => {
+    if (selectedId == null) { setHistory([]); return; }
+    setHistoryLoading(true);
+    setHistory([]);
+    fetch(`/api/dashboard/boards/${selectedId}/history?hours=24`)
+      .then((r) => (r.ok ? r.json() : { timeline: [] }))
+      .then((d) => setHistory(d.timeline ?? []))
+      .catch(console.error)
+      .finally(() => setHistoryLoading(false));
   }, [selectedId]);
 
   const handleAddBoard = async (form: NewBoardForm) => {
@@ -708,6 +722,8 @@ export default function DashboardPage() {
               board={selectedBoard}
               data={selectedData}
               loading={loadingData}
+              history={history}
+              historyLoading={historyLoading}
               onClose={closePanel}
             />
           </div>
@@ -733,6 +749,8 @@ export default function DashboardPage() {
                   board={selectedBoard}
                   data={selectedData}
                   loading={loadingData}
+                  history={history}
+                  historyLoading={historyLoading}
                   onClose={closePanel}
                 />
               </div>

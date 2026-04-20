@@ -2,6 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import {
   Thermometer,
   Droplets,
   Sun,
@@ -42,10 +51,20 @@ export interface BoardSensorData {
   is_historical?:    boolean;        // true when data is from an older 3-h window (board offline)
 }
 
+export interface HistoryPoint {
+  time:             string;
+  indoor_temp:      number | null;
+  indoor_humidity:  number | null;
+  outdoor_temp:     number | null;
+  outdoor_humidity: number | null;
+}
+
 interface Props {
-  board:   DashboardBoard | null;
-  data:    BoardSensorData | null;
-  loading: boolean;
+  board:    DashboardBoard | null;
+  data:     BoardSensorData | null;
+  loading:  boolean;
+  history:  HistoryPoint[];
+  historyLoading: boolean;
   onClose?: () => void;
 }
 
@@ -105,7 +124,103 @@ function formatRelative(iso: string | null) {
   } catch { return "—"; }
 }
 
-export default function DataPanel({ board, data, loading, onClose }: Props) {
+function formatHour(iso: string) {
+  try {
+    const d = new Date(iso);
+    return `${d.getHours().toString().padStart(2, "0")}:00`;
+  } catch { return iso; }
+}
+
+interface MiniChartProps {
+  data: HistoryPoint[];
+  metric: "temp" | "humidity";
+}
+
+function MiniChart({ data, metric }: MiniChartProps) {
+  const indoorKey  = metric === "temp" ? "indoor_temp"      : "indoor_humidity";
+  const outdoorKey = metric === "temp" ? "outdoor_temp"     : "outdoor_humidity";
+  const unit       = metric === "temp" ? "°C"               : "%";
+  const indoorColor  = metric === "temp" ? "#f97316" : "#38bdf8";
+  const outdoorColor = "#22c55e";
+
+  const chartData = data.map((p) => ({
+    time:    p.time,
+    Indoor:  p[indoorKey],
+    TMD:     p[outdoorKey],
+  }));
+
+  // compute domain with 2-unit padding
+  const vals = chartData.flatMap((p) => [p.Indoor, p.TMD]).filter((v): v is number => v != null);
+  const minVal = vals.length ? Math.floor(Math.min(...vals)) - 2  : 0;
+  const maxVal = vals.length ? Math.ceil(Math.max(...vals))  + 2  : 100;
+
+  return (
+    <ResponsiveContainer width="100%" height={130}>
+      <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+        <defs>
+          <linearGradient id={`grad-indoor-${metric}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%"  stopColor={indoorColor}  stopOpacity={0.35} />
+            <stop offset="95%" stopColor={indoorColor}  stopOpacity={0.02} />
+          </linearGradient>
+          <linearGradient id={`grad-tmd-${metric}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%"  stopColor={outdoorColor} stopOpacity={0.35} />
+            <stop offset="95%" stopColor={outdoorColor} stopOpacity={0.02} />
+          </linearGradient>
+        </defs>
+        <XAxis
+          dataKey="time"
+          tickFormatter={formatHour}
+          tick={{ fill: "#4b5563", fontSize: 9 }}
+          tickLine={false}
+          axisLine={false}
+          interval="preserveStartEnd"
+        />
+        <YAxis
+          domain={[minVal, maxVal]}
+          tick={{ fill: "#4b5563", fontSize: 9 }}
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={(v) => `${v}${unit}`}
+        />
+        <Tooltip
+          contentStyle={{ background: "#111827", border: "1px solid #1f2937", borderRadius: 8, fontSize: 11 }}
+          labelStyle={{ color: "#6b7280", marginBottom: 4 }}
+          labelFormatter={(l) => formatHour(l as string)}
+          formatter={(value, name) => [value != null ? `${(+value).toFixed(1)}${unit}` : "—", name as string]}
+          itemStyle={{ color: "#d1d5db" }}
+        />
+        <Legend
+          iconType="circle"
+          iconSize={6}
+          wrapperStyle={{ fontSize: 10, paddingTop: 4 }}
+          formatter={(value) => <span style={{ color: "#9ca3af" }}>{value}</span>}
+        />
+        <Area
+          type="monotone"
+          dataKey="TMD"
+          stroke={outdoorColor}
+          strokeWidth={1.5}
+          fill={`url(#grad-tmd-${metric})`}
+          dot={false}
+          activeDot={{ r: 3 }}
+          connectNulls
+        />
+        <Area
+          type="monotone"
+          dataKey="Indoor"
+          stroke={indoorColor}
+          strokeWidth={1.5}
+          fill={`url(#grad-indoor-${metric})`}
+          dot={false}
+          activeDot={{ r: 3 }}
+          connectNulls
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+export default function DataPanel({ board, data, loading, history, historyLoading, onClose }: Props) {
   return (
     <div className="h-full flex flex-col bg-[#0d1117] border-l border-[#1f2937]">
       <AnimatePresence mode="wait">
@@ -343,6 +458,44 @@ export default function DataPanel({ board, data, loading, onClose }: Props) {
                               </span>
                             </div>
                           )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* ── Historical Charts ─────────────────────────────── */}
+                  {(history.length > 0 || historyLoading) && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="w-3 h-3 text-[#374151]" />
+                        <span className="text-[10px] font-semibold text-[#374151] uppercase tracking-wider">
+                          24h Trend — Indoor vs TMD
+                        </span>
+                      </div>
+
+                      {historyLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="w-5 h-5 text-[#22c55e] animate-spin" />
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {/* Temperature chart */}
+                          <div className="rounded-xl border border-[#1f2937] bg-[#111827] p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Thermometer className="w-3 h-3 text-[#f97316]" />
+                              <span className="text-[10px] font-semibold text-[#9ca3af]">Temperature (°C)</span>
+                            </div>
+                            <MiniChart data={history} metric="temp" />
+                          </div>
+
+                          {/* Humidity chart */}
+                          <div className="rounded-xl border border-[#1f2937] bg-[#111827] p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Droplets className="w-3 h-3 text-[#38bdf8]" />
+                              <span className="text-[10px] font-semibold text-[#9ca3af]">Humidity (%)</span>
+                            </div>
+                            <MiniChart data={history} metric="humidity" />
+                          </div>
                         </div>
                       )}
                     </div>
